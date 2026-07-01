@@ -1,0 +1,181 @@
+{% extends 'base.html' %}
+{% block title %}Nouvelle Facture — DepôtGest{% endblock %}
+{% block page_title %}<i class="bi bi-receipt me-2"></i>Créer une facture{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-body p-4">
+                <form method="post" id="form-facture">
+                    {% csrf_token %}
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Client *</label>
+                            <select name="client" class="form-select" required>
+                                <option value="">— Choisir un client —</option>
+                                {% for c in clients %}
+                                <option value="{{ c.id }}">{{ c.nom }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Annexe *</label>
+                            <select name="annexe" class="form-select" required>
+                                <option value="">— Choisir une annexe —</option>
+                                {% for a in annexes %}
+                                <option value="{{ a.id }}">{{ a.nom }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Lignes produits -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Produits *</label>
+                        <div id="lignes-container">
+                            <div class="row g-2 mb-2 ligne-produit">
+                                <div class="col-md-5">
+                                    <select name="produit_id" class="form-select produit-select">
+                                        <option value="">— Produit —</option>
+                                        {% for p in produits %}
+                                        <option value="{{ p.id }}"
+                                                data-prix="{{ p.prix_vente }}">
+                                            {{ p.nom }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <input type="number" name="quantite"
+                                           class="form-control" placeholder="Qté" min="1">
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="input-group">
+                                        <input type="number" name="prix_unitaire"
+                                               class="form-control prix-field"
+                                               placeholder="Prix unitaire" min="0" step="50">
+                                        <span class="input-group-text">F</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-1">
+                                    <button type="button"
+                                            class="btn btn-outline-danger btn-suppr-ligne"
+                                            onclick="supprimerLigne(this)">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-outline-primary btn-sm mt-2"
+                                onclick="ajouterLigne()">
+                            <i class="bi bi-plus-lg me-1"></i> Ajouter une ligne
+                        </button>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">Note</label>
+                        <textarea name="note" class="form-control" rows="2"
+                                  placeholder="Observations..."></textarea>
+                    </div>
+
+                    <!-- Total -->
+                    <div class="alert alert-light border d-flex justify-content-between align-items-center">
+                        <span class="fw-semibold">Total estimé :</span>
+                        <span class="fw-bold fs-5 text-success" id="total-display">0 FCFA</span>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn text-white px-4"
+                                style="background:#1A376C;">
+                            <i class="bi bi-check-lg me-1"></i> Créer la facture
+                        </button>
+                        <a href="{% url 'liste_factures' %}" class="btn btn-outline-secondary px-4">
+                            <i class="bi bi-x-lg me-1"></i> Annuler
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Template d'une ligne produit
+const produitsOptions = `{% for p in produits %}<option value="{{ p.id }}" data-prix="{{ p.prix_vente }}">{{ p.nom }}</option>{% endfor %}`;
+
+function ajouterLigne() {
+    const container = document.getElementById('lignes-container');
+    const div = document.createElement('div');
+    div.className = 'row g-2 mb-2 ligne-produit';
+    div.innerHTML = `
+        <div class="col-md-5">
+            <select name="produit_id" class="form-select produit-select">
+                <option value="">— Produit —</option>
+                ${produitsOptions}
+            </select>
+        </div>
+        <div class="col-md-3">
+            <input type="number" name="quantite" class="form-control" placeholder="Qté" min="1">
+        </div>
+        <div class="col-md-3">
+            <div class="input-group">
+                <input type="number" name="prix_unitaire" class="form-control prix-field"
+                       placeholder="Prix unitaire" min="0" step="50">
+                <span class="input-group-text">F</span>
+            </div>
+        </div>
+        <div class="col-md-1">
+            <button type="button" class="btn btn-outline-danger btn-suppr-ligne"
+                    onclick="supprimerLigne(this)">
+                <i class="bi bi-trash"></i>
+            </button>
+        </div>
+    `;
+    container.appendChild(div);
+    attacherEvenements(div);
+    calculerTotal();
+}
+
+function supprimerLigne(btn) {
+    const lignes = document.querySelectorAll('.ligne-produit');
+    if (lignes.length > 1) {
+        btn.closest('.ligne-produit').remove();
+        calculerTotal();
+    }
+}
+
+function attacherEvenements(container) {
+    const select = container.querySelector('.produit-select');
+    const prixField = container.querySelector('.prix-field');
+    const qteField = container.querySelector('input[name="quantite"]');
+
+    select.addEventListener('change', function() {
+        const option = this.options[this.selectedIndex];
+        const prix = option.getAttribute('data-prix');
+        if (prix) prixField.value = prix;
+        calculerTotal();
+    });
+
+    prixField.addEventListener('input', calculerTotal);
+    qteField.addEventListener('input', calculerTotal);
+}
+
+function calculerTotal() {
+    let total = 0;
+    document.querySelectorAll('.ligne-produit').forEach(ligne => {
+        const qte = parseFloat(ligne.querySelector('input[name="quantite"]').value) || 0;
+        const prix = parseFloat(ligne.querySelector('.prix-field').value) || 0;
+        total += qte * prix;
+    });
+    document.getElementById('total-display').textContent =
+        total.toLocaleString('fr-FR') + ' FCFA';
+}
+
+// Attacher événements à la première ligne
+document.querySelectorAll('.ligne-produit').forEach(attacherEvenements);
+</script>
+{% endblock %}

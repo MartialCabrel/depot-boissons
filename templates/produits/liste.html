@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% block title %}Produits — DepôtGest{% endblock %}
+{% block page_title %}<i class="bi bi-box-seam me-2"></i>Produits{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <span class="text-muted">{{ produits.count }} produit(s) actif(s)</span>
+    </div>
+    <a href="{% url 'ajouter_produit' %}" class="btn text-white"
+       style="background:#1A376C;">
+        <i class="bi bi-plus-lg me-1"></i> Ajouter un produit
+    </a>
+</div>
+
+<!-- Filtre catégorie -->
+<div class="card mb-4">
+    <div class="card-body py-2">
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="{% url 'liste_produits' %}"
+               class="btn btn-sm {% if not request.GET.cat %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                Tous
+            </a>
+            {% for cat in categories %}
+            <a href="?cat={{ cat.id }}"
+               class="btn btn-sm {% if request.GET.cat == cat.id|stringformat:'s' %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                {{ cat.nom }}
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Table produits -->
+<div class="card">
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>#</th>
+                    <th>Nom</th>
+                    <th>Catégorie</th>
+                    <th>Prix vente</th>
+                    <th>Unité</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for produit in produits %}
+                <tr>
+                    <td class="text-muted">{{ forloop.counter }}</td>
+                    <td class="fw-semibold">{{ produit.nom }}</td>
+                    <td>
+                        {% if produit.categorie %}
+                            <span class="badge bg-light text-dark border">{{ produit.categorie }}</span>
+                        {% else %}
+                            <span class="text-muted">—</span>
+                        {% endif %}
+                    </td>
+                    <td class="fw-semibold text-success">{{ produit.prix_vente }} FCFA</td>
+                    <td>{{ produit.unite }}</td>
+                    <td class="text-end">
+                        <a href="{% url 'modifier_produit' produit.pk %}"
+                           class="btn btn-sm btn-outline-primary me-1">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+                        <a href="{% url 'supprimer_produit' produit.pk %}"
+                           class="btn btn-sm btn-outline-danger"
+                           onclick="return confirm('Supprimer ce produit ?')">
+                            <i class="bi bi-trash"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center py-5 text-muted">
+                        <i class="bi bi-box-seam" style="font-size:2.5rem;"></i>
+                        <br><br>Aucun produit enregistré.
+                        <br><a href="{% url 'ajouter_produit' %}">Ajouter le premier produit</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

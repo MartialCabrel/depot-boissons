@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+{% block title %}Factures — DepôtGest{% endblock %}
+{% block page_title %}<i class="bi bi-receipt me-2"></i>Factures{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <span class="text-muted">{{ factures.count }} facture(s)</span>
+    <a href="{% url 'creer_facture' %}" class="btn text-white"
+       style="background:#1A376C;">
+        <i class="bi bi-plus-lg me-1"></i> Nouvelle facture
+    </a>
+</div>
+
+<!-- Filtres statut -->
+<div class="card mb-4">
+    <div class="card-body py-2">
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="{% url 'liste_factures' %}"
+               class="btn btn-sm {% if not statut_filtre %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                Toutes
+            </a>
+            <a href="?statut=en_attente"
+               class="btn btn-sm {% if statut_filtre == 'en_attente' %}btn-warning{% else %}btn-outline-warning{% endif %}">
+                En attente
+            </a>
+            <a href="?statut=partiellement_payee"
+               class="btn btn-sm {% if statut_filtre == 'partiellement_payee' %}btn-info{% else %}btn-outline-info{% endif %}">
+                Partiellement payées
+            </a>
+            <a href="?statut=payee"
+               class="btn btn-sm {% if statut_filtre == 'payee' %}btn-success{% else %}btn-outline-success{% endif %}">
+                Payées
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Numéro</th>
+                    <th>Client</th>
+                    <th>Annexe</th>
+                    <th>Montant</th>
+                    <th>Payé</th>
+                    <th>Reste</th>
+                    <th>Statut</th>
+                    <th>Date</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for f in factures %}
+                <tr>
+                    <td class="fw-semibold">{{ f.numero }}</td>
+                    <td>{{ f.client }}</td>
+                    <td>{{ f.annexe }}</td>
+                    <td class="fw-semibold">{{ f.montant_total }} F</td>
+                    <td class="text-success">{{ f.montant_paye }} F</td>
+                    <td class="{% if f.montant_restant > 0 %}text-danger fw-semibold{% else %}text-success{% endif %}">
+                        {% if f.montant_restant > 0 %}
+                            {{ f.montant_restant }} F
+                        {% else %}
+                            0 F ✅
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if f.statut == 'payee' %}
+                            <span class="badge bg-success">Payée</span>
+                        {% elif f.statut == 'partiellement_payee' %}
+                            <span class="badge bg-info">Partiel</span>
+                        {% elif f.statut == 'annulee' %}
+                            <span class="badge bg-dark">Annulée</span>
+                        {% else %}
+                            <span class="badge bg-warning text-dark">En attente</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ f.date_creation|date:"d/m/Y" }}</td>
+                    <td class="text-end">
+                        <a href="{% url 'detail_facture' f.pk %}"
+                           class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-eye"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="9" class="text-center py-5 text-muted">
+                        <i class="bi bi-receipt" style="font-size:2.5rem;"></i>
+                        <br><br>Aucune facture enregistrée.
+                        <br><a href="{% url 'creer_facture' %}">Créer la première facture</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

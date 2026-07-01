@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% block title %}Nouvelle Sortie — DepôtGest{% endblock %}
+{% block page_title %}<i class="bi bi-arrow-up-circle me-2"></i>Enregistrer une sortie de stock{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body p-4">
+                <form method="post">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Type de sortie *</label>
+                        <select name="type_mouvement" class="form-select" required>
+                            <option value="sortie">Sortie livraison</option>
+                            <option value="vente_directe">Vente directe</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Produit *</label>
+                        <select name="produit" class="form-select" required>
+                            <option value="">— Choisir un produit —</option>
+                            {% for p in produits %}
+                            <option value="{{ p.id }}">{{ p.nom }} ({{ p.unite }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Annexe *</label>
+                        <select name="annexe" class="form-select" required>
+                            <option value="">— Choisir une annexe —</option>
+                            {% for a in annexes %}
+                            <option value="{{ a.id }}">{{ a.nom }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Quantité sortante *</label>
+                        <div class="input-group">
+                            <input type="number" name="quantite" class="form-control"
+                                   placeholder="Ex: 20" min="1" required>
+                            <span class="input-group-text">unités</span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Référence</label>
+                        <input type="text" name="reference" class="form-control"
+                               placeholder="Ex: BON-2026-001">
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">Note</label>
+                        <textarea name="note" class="form-control" rows="2"
+                                  placeholder="Observations éventuelles..."></textarea>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn text-white px-4"
+                                style="background:#C05514;">
+                            <i class="bi bi-check-lg me-1"></i> Enregistrer
+                        </button>
+                        <a href="{% url 'sorties_stock' %}" class="btn btn-outline-secondary px-4">
+                            <i class="bi bi-x-lg me-1"></i> Annuler
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

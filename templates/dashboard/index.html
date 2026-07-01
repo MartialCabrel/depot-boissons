@@ -1,0 +1,158 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard — DepôtGest{% endblock %}
+{% block page_title %}<i class="bi bi-speedometer2 me-2"></i>Dashboard{% endblock %}
+
+{% block content %}
+
+<!-- Cartes statistiques -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="stat-card" style="background:linear-gradient(135deg,#1A376C,#2E75B6);">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <div class="stat-label">Total Produits</div>
+                    <div class="stat-value">{{ total_produits }}</div>
+                </div>
+                <i class="bi bi-box-seam stat-icon"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card" style="background:linear-gradient(135deg,#1E7E34,#28a745);">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <div class="stat-label">Factures du jour</div>
+                    <div class="stat-value">{{ factures_jour }}</div>
+                </div>
+                <i class="bi bi-receipt stat-icon"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card" style="background:linear-gradient(135deg,#C05514,#e07b3a);">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <div class="stat-label">Factures impayées</div>
+                    <div class="stat-value">{{ factures_impayees }}</div>
+                </div>
+                <i class="bi bi-exclamation-triangle stat-icon"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card" style="background:linear-gradient(135deg,#5a189a,#7b2fbe);">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <div class="stat-label">Encaissé aujourd'hui</div>
+                    <div class="stat-value">{{ encaisse_jour }} F</div>
+                </div>
+                <i class="bi bi-cash-stack stat-icon"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Alertes stock -->
+{% if alertes_stock %}
+<div class="alert alert-warning d-flex align-items-center mb-4">
+    <i class="bi bi-exclamation-triangle-fill me-3" style="font-size:1.5rem;"></i>
+    <div>
+        <strong>Alerte stock bas !</strong>
+        {{ alertes_stock|length }} produit(s) en dessous du seuil minimum.
+        <a href="#" class="alert-link ms-2">Voir les détails</a>
+    </div>
+</div>
+{% endif %}
+
+<div class="row g-3">
+    <!-- Mouvements récents -->
+    <div class="col-md-7">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-arrow-left-right me-2"></i>Mouvements récents</span>
+                <a href="#" class="btn btn-sm btn-outline-primary">Voir tout</a>
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Produit</th>
+                            <th>Type</th>
+                            <th>Qté</th>
+                            <th>Annexe</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for m in mouvements_recents %}
+                        <tr>
+                            <td>{{ m.produit }}</td>
+                            <td>
+                                {% if m.type_mouvement == 'entree' %}
+                                    <span class="badge bg-success">{{ m.get_type_mouvement_display }}</span>
+                                {% elif m.type_mouvement == 'sortie' %}
+                                    <span class="badge bg-danger">{{ m.get_type_mouvement_display }}</span>
+                                {% elif m.type_mouvement == 'retour' %}
+                                    <span class="badge bg-warning text-dark">{{ m.get_type_mouvement_display }}</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">{{ m.get_type_mouvement_display }}</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ m.quantite }}</td>
+                            <td>{{ m.annexe }}</td>
+                            <td>{{ m.date|date:"d/m H:i" }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center text-muted py-4">
+                                <i class="bi bi-inbox" style="font-size:2rem;"></i>
+                                <br>Aucun mouvement enregistré
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Factures impayées -->
+    <div class="col-md-5">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-receipt me-2"></i>Factures impayées</span>
+                <a href="#" class="btn btn-sm btn-outline-danger">Voir tout</a>
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>N°</th>
+                            <th>Client</th>
+                            <th>Montant</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for f in factures_en_attente %}
+                        <tr>
+                            <td><small>{{ f.numero }}</small></td>
+                            <td>{{ f.client }}</td>
+                            <td class="text-danger fw-semibold">{{ f.montant_total }} F</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="3" class="text-center text-muted py-4">
+                                <i class="bi bi-check-circle text-success" style="font-size:2rem;"></i>
+                                <br>Aucune facture impayée
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% block title %}Ouvrir la caisse — DepôtGest{% endblock %}
+{% block page_title %}<i class="bi bi-unlock me-2"></i>Ouvrir la session de caisse{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-5">
+        <div class="card">
+            <div class="card-body p-4">
+                <form method="post">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Annexe *</label>
+                        <select name="annexe" class="form-select" required>
+                            <option value="">— Choisir une annexe —</option>
+                            {% for a in annexes %}
+                            <option value="{{ a.id }}">{{ a.nom }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">Fond de caisse initial (F)</label>
+                        <div class="input-group">
+                            <input type="number" name="montant_ouverture"
+                                   class="form-control" placeholder="Ex: 10000"
+                                   min="0" step="500" value="0">
+                            <span class="input-group-text">FCFA</span>
+                        </div>
+                        <small class="text-muted">Montant en espèces disponible à l'ouverture</small>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-success px-4">
+                            <i class="bi bi-unlock me-1"></i> Ouvrir la caisse
+                        </button>
+                        <a href="{% url 'tableau_caisse' %}"
+                           class="btn btn-outline-secondary px-4">
+                            <i class="bi bi-x-lg me-1"></i> Annuler
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

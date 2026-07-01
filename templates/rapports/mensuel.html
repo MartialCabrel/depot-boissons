@@ -1,0 +1,190 @@
+{% extends 'base.html' %}
+{% block title %}Rapport Mensuel — DepôtGest{% endblock %}
+{% block page_title %}<i class="bi bi-calendar-month me-2"></i>Rapport Mensuel{% endblock %}
+
+{% block content %}
+
+<!-- Sélecteur mois/année -->
+<div class="card mb-4">
+    <div class="card-body py-2">
+        <form method="get" class="d-flex align-items-center gap-3 flex-wrap">
+            <label class="fw-semibold mb-0">Mois :</label>
+            <select name="mois" class="form-select" style="width:160px;">
+                {% for num, nom in mois_liste %}
+                <option value="{{ num }}" {% if num == mois %}selected{% endif %}>
+                    {{ nom }}
+                </option>
+                {% endfor %}
+            </select>
+            <select name="annee" class="form-select" style="width:100px;">
+                {% for a in annees_liste %}
+                <option value="{{ a }}" {% if a == annee %}selected{% endif %}>{{ a }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-search me-1"></i> Voir
+            </button>
+            <!-- Exports -->
+            <div class="ms-auto d-flex gap-2">
+                <a href="{% url 'export_pdf' 'mensuel' %}?mois={{ mois }}&annee={{ annee }}"
+                   class="btn btn-danger">
+                    <i class="bi bi-file-earmark-pdf me-1"></i> PDF
+                </a>
+                <a href="{% url 'export_excel' 'mensuel' %}?mois={{ mois }}&annee={{ annee }}"
+                   class="btn btn-success">
+                    <i class="bi bi-file-earmark-excel me-1"></i> Excel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Cartes résumé -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="stat-card" style="background:linear-gradient(135deg,#1A376C,#2E75B6);">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <div class="stat-label">Total encaissé</div>
+                    <div class="stat-value">{{ total_encaisse|floatformat:0 }} F</div>
+                </div>
+                <i class="bi bi-cash-stack stat-icon"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card" style="background:linear-gradient(135deg,#1E7E34,#28a745);">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <div class="stat-label">Entrées stock</div>
+                    <div class="stat-value">{{ entrees.count }}</div>
+                </div>
+                <i class="bi bi-arrow-down-circle stat-icon"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card" style="background:linear-gradient(135deg,#C05514,#e07b3a);">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <div class="stat-label">Sorties stock</div>
+                    <div class="stat-value">{{ sorties.count }}</div>
+                </div>
+                <i class="bi bi-arrow-up-circle stat-icon"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card" style="background:linear-gradient(135deg,#5a189a,#7b2fbe);">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <div class="stat-label">Factures impayées</div>
+                    <div class="stat-value">{{ factures_impayees.count }}</div>
+                </div>
+                <i class="bi bi-receipt stat-icon"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <!-- Ventes par jour -->
+    <div class="col-md-7">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between">
+                <span><i class="bi bi-calendar me-2"></i>Ventes par jour</span>
+            </div>
+            <div class="card-body p-0" style="max-height:400px;overflow-y:auto;">
+                <table class="table table-sm mb-0">
+                    <thead class="table-light" style="position:sticky;top:0;">
+                        <tr>
+                            <th>Jour</th>
+                            <th class="text-center">Factures</th>
+                            <th class="text-end">Encaissé</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for v in ventes_par_jour %}
+                        <tr {% if v.jour == aujourd_hui %}style="background:#f0f7ff;"{% endif %}>
+                            <td>
+                                {{ v.jour|date:"l d/m" }}
+                                {% if v.jour == aujourd_hui %}
+                                <span class="badge bg-primary ms-1">Auj.</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-center">{{ v.nb_factures }}</td>
+                            <td class="text-end fw-semibold
+                                {% if v.total > 0 %}text-success{% else %}text-muted{% endif %}">
+                                {{ v.total|floatformat:0 }} F
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot class="table-light">
+                        <tr>
+                            <td colspan="2" class="text-end fw-bold">Total</td>
+                            <td class="text-end fw-bold text-primary">
+                                {{ total_encaisse|floatformat:0 }} F
+                            </td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top produits -->
+    <div class="col-md-5">
+        <div class="card mb-3">
+            <div class="card-header">
+                <i class="bi bi-trophy me-2"></i>Top 10 produits du mois
+            </div>
+            <div class="card-body">
+                {% for p in top_produits %}
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge rounded-pill"
+                              style="background:#1A376C;min-width:28px;height:28px;
+                                     display:flex;align-items:center;justify-content:center;">
+                            {{ forloop.counter }}
+                        </span>
+                        <span>{{ p.produit__nom }}</span>
+                    </div>
+                    <span class="badge bg-light text-dark border fw-semibold">
+                        {{ p.total_sorti }} unités
+                    </span>
+                </div>
+                {% empty %}
+                <p class="text-center text-muted">Aucune vente ce mois</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Paiements par mode -->
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-cash me-2"></i>Paiements par mode
+            </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between mb-2">
+                    <span>💵 Espèces</span>
+                    <span class="fw-bold text-success">{{ total_cash|floatformat:0 }} F</span>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <span>📱 MTN MoMo</span>
+                    <span class="fw-bold" style="color:#C05514;">{{ total_mtn|floatformat:0 }} F</span>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <span>🟠 Orange Money</span>
+                    <span class="fw-bold text-danger">{{ total_orange|floatformat:0 }} F</span>
+                </div>
+                <hr>
+                <div class="d-flex justify-content-between">
+                    <span class="fw-bold">Total</span>
+                    <span class="fw-bold fs-5 text-primary">{{ total_encaisse|floatformat:0 }} F</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% block title %}Sorties Stock — DepôtGest{% endblock %}
+{% block page_title %}<i class="bi bi-arrow-up-circle me-2"></i>Sorties de Stock{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <span class="text-muted">{{ sorties.count }} sortie(s) récente(s)</span>
+    <a href="{% url 'ajouter_sortie' %}" class="btn text-white"
+       style="background:#C05514;">
+        <i class="bi bi-plus-lg me-1"></i> Enregistrer une sortie
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>#</th>
+                    <th>Produit</th>
+                    <th>Annexe</th>
+                    <th>Type</th>
+                    <th>Quantité</th>
+                    <th>Référence</th>
+                    <th>Enregistré par</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for sortie in sorties %}
+                <tr>
+                    <td class="text-muted">{{ forloop.counter }}</td>
+                    <td class="fw-semibold">{{ sortie.produit }}</td>
+                    <td>{{ sortie.annexe }}</td>
+                    <td>
+                        {% if sortie.type_mouvement == 'vente_directe' %}
+                            <span class="badge bg-primary">Vente directe</span>
+                        {% else %}
+                            <span class="badge bg-warning text-dark">Livraison</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <span class="badge bg-danger fs-6">
+                            -{{ sortie.quantite }}
+                        </span>
+                    </td>
+                    <td>{{ sortie.reference|default:"—" }}</td>
+                    <td>{{ sortie.effectue_par|default:"—" }}</td>
+                    <td>{{ sortie.date|date:"d/m/Y H:i" }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8" class="text-center py-5 text-muted">
+                        <i class="bi bi-arrow-up-circle" style="font-size:2.5rem;"></i>
+                        <br><br>Aucune sortie enregistrée.
+                        <br><a href="{% url 'ajouter_sortie' %}">Enregistrer la première sortie</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

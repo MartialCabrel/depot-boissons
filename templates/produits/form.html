@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% block title %}{% if produit %}Modifier{% else %}Ajouter{% endif %} Produit{% endblock %}
+{% block page_title %}
+    <i class="bi bi-box-seam me-2"></i>
+    {% if produit %}Modifier "{{ produit.nom }}"{% else %}Ajouter un produit{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body p-4">
+                <form method="post">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Nom du produit *</label>
+                        <input type="text" name="nom" class="form-control"
+                               placeholder="Ex: Jus Top Orange"
+                               value="{{ produit.nom|default:'' }}" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Catégorie</label>
+                        <select name="categorie" class="form-select">
+                            <option value="">— Sans catégorie —</option>
+                            {% for cat in categories %}
+                            <option value="{{ cat.id }}"
+                                {% if produit.categorie_id == cat.id %}selected{% endif %}>
+                                {{ cat.nom }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Prix de vente (FCFA) *</label>
+                        <div class="input-group">
+                            <input type="number" name="prix_vente" class="form-control"
+                                   placeholder="Ex: 5000"
+                                   value="{{ produit.prix_vente|default:'' }}"
+                                   min="0" step="50" required>
+                            <span class="input-group-text">FCFA</span>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">Unité *</label>
+                        <select name="unite" class="form-select" required>
+                            <option value="">— Choisir —</option>
+                            {% for val, label in unites %}
+                            <option value="{{ val }}"
+                                {% if produit.unite == val %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn text-white px-4"
+                                style="background:#1A376C;">
+                            <i class="bi bi-check-lg me-1"></i>
+                            {% if produit %}Modifier{% else %}Ajouter{% endif %}
+                        </button>
+                        <a href="{% url 'liste_produits' %}" class="btn btn-outline-secondary px-4">
+                            <i class="bi bi-x-lg me-1"></i> Annuler
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

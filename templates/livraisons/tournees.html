@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% block title %}Tournées — DepôtGest{% endblock %}
+{% block page_title %}<i class="bi bi-truck me-2"></i>Tournées{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <span class="text-muted">{{ tournees.count }} tournée(s)</span>
+    <a href="{% url 'creer_tournee' %}" class="btn text-white"
+       style="background:#1A376C;">
+        <i class="bi bi-plus-lg me-1"></i> Nouvelle tournée
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>#</th>
+                    <th>Livreur</th>
+                    <th>Annexe</th>
+                    <th>Date</th>
+                    <th>Statut</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for t in tournees %}
+                <tr>
+                    <td class="text-muted">{{ t.id }}</td>
+                    <td class="fw-semibold">{{ t.livreur.get_full_name|default:t.livreur.username }}</td>
+                    <td>{{ t.annexe }}</td>
+                    <td>{{ t.date|date:"d/m/Y" }}</td>
+                    <td>
+                        {% if t.statut == 'en_cours' %}
+                            <span class="badge bg-warning text-dark">
+                                <i class="bi bi-truck me-1"></i>En cours
+                            </span>
+                        {% elif t.statut == 'terminee' %}
+                            <span class="badge bg-success">
+                                <i class="bi bi-check me-1"></i>Terminée
+                            </span>
+                        {% else %}
+                            <span class="badge bg-secondary">Annulée</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-end">
+                        <a href="{% url 'detail_tournee' t.pk %}"
+                           class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-eye"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center py-5 text-muted">
+                        <i class="bi bi-truck" style="font-size:2.5rem;"></i>
+                        <br><br>Aucune tournée enregistrée.
+                        <br><a href="{% url 'creer_tournee' %}">Créer la première tournée</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+{% block title %}Nouvelle Tournée — DepôtGest{% endblock %}
+{% block page_title %}<i class="bi bi-truck me-2"></i>Créer une tournée{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-body p-4">
+                <form method="post">
+                    {% csrf_token %}
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Livreur *</label>
+                            <select name="livreur" class="form-select" required>
+                                <option value="">— Choisir un livreur —</option>
+                                {% for l in livreurs %}
+                                <option value="{{ l.id }}">
+                                    {{ l.get_full_name|default:l.username }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Annexe *</label>
+                            <select name="annexe" class="form-select" required>
+                                <option value="">— Choisir une annexe —</option>
+                                {% for a in annexes %}
+                                <option value="{{ a.id }}">{{ a.nom }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Produits à charger -->
+                    <label class="form-label fw-semibold">Produits à charger *</label>
+                    <div id="lignes-container">
+                        <div class="row g-2 mb-2 ligne-produit">
+                            <div class="col-md-7">
+                                <select name="produit_id" class="form-select">
+                                    <option value="">— Choisir un produit —</option>
+                                    {% for p in produits %}
+                                    <option value="{{ p.id }}">
+                                        {{ p.nom }} ({{ p.unite }})
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="input-group">
+                                    <input type="number" name="quantite_chargee"
+                                           class="form-control" placeholder="Qté chargée"
+                                           min="1">
+                                    <span class="input-group-text">unités</span>
+                                </div>
+                            </div>
+                            <div class="col-md-1">
+                                <button type="button"
+                                        class="btn btn-outline-danger"
+                                        onclick="supprimerLigne(this)">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="button" class="btn btn-outline-primary btn-sm mt-2 mb-4"
+                            onclick="ajouterLigne()">
+                        <i class="bi bi-plus-lg me-1"></i> Ajouter un produit
+                    </button>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn text-white px-4"
+                                style="background:#1A376C;">
+                            <i class="bi bi-check-lg me-1"></i> Lancer la tournée
+                        </button>
+                        <a href="{% url 'liste_tournees' %}"
+                           class="btn btn-outline-secondary px-4">
+                            <i class="bi bi-x-lg me-1"></i> Annuler
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const options = `{% for p in produits %}<option value="{{ p.id }}">{{ p.nom }} ({{ p.unite }})</option>{% endfor %}`;
+
+function ajouterLigne() {
+    const container = document.getElementById('lignes-container');
+    const div = document.createElement('div');
+    div.className = 'row g-2 mb-2 ligne-produit';
+    div.innerHTML = `
+        <div class="col-md-7">
+            <select name="produit_id" class="form-select">
+                <option value="">— Choisir un produit —</option>
+                ${options}
+            </select>
+        </div>
+        <div class="col-md-4">
+            <div class="input-group">
+                <input type="number" name="quantite_chargee"
+                       class="form-control" placeholder="Qté chargée" min="1">
+                <span class="input-group-text">unités</span>
+            </div>
+        </div>
+        <div class="col-md-1">
+            <button type="button" class="btn btn-outline-danger"
+                    onclick="supprimerLigne(this)">
+                <i class="bi bi-trash"></i>
+            </button>
+        </div>
+    `;
+    container.appendChild(div);
+}
+
+function supprimerLigne(btn) {
+    const lignes = document.querySelectorAll('.ligne-produit');
+    if (lignes.length > 1) {
+        btn.closest('.ligne-produit').remove();
+    }
+}
+</script>
+{% endblock %}

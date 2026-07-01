@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% block title %}Transferts — DepôtGest{% endblock %}
+{% block page_title %}<i class="bi bi-arrow-left-right me-2"></i>Transferts entre Annexes{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <span class="text-muted">{{ transferts.count }} transfert(s) récent(s)</span>
+    <a href="{% url 'ajouter_transfert' %}" class="btn text-white"
+       style="background:#5a189a;">
+        <i class="bi bi-plus-lg me-1"></i> Nouveau transfert
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>#</th>
+                    <th>Produit</th>
+                    <th>De</th>
+                    <th></th>
+                    <th>Vers</th>
+                    <th>Quantité</th>
+                    <th>Effectué par</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for t in transferts %}
+                <tr>
+                    <td class="text-muted">{{ forloop.counter }}</td>
+                    <td class="fw-semibold">{{ t.produit }}</td>
+                    <td>
+                        <span class="badge bg-danger">{{ t.annexe_source }}</span>
+                    </td>
+                    <td><i class="bi bi-arrow-right text-muted"></i></td>
+                    <td>
+                        <span class="badge bg-success">{{ t.annexe_destination }}</span>
+                    </td>
+                    <td>
+                        <span class="badge bg-purple text-white" style="background:#5a189a;">
+                            {{ t.quantite }} unités
+                        </span>
+                    </td>
+                    <td>{{ t.effectue_par|default:"—" }}</td>
+                    <td>{{ t.date|date:"d/m/Y H:i" }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8" class="text-center py-5 text-muted">
+                        <i class="bi bi-arrow-left-right" style="font-size:2.5rem;"></i>
+                        <br><br>Aucun transfert enregistré.
+                        <br><a href="{% url 'ajouter_transfert' %}">Effectuer le premier transfert</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
