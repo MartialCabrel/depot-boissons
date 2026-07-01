@@ -14,88 +14,10 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.contrib import admin
-from django.urls import path
-
-urlpatterns = [
-    path('admin/', admin.site.urls),
-]
 
 from django.contrib import admin
 from django.urls import path, include
-
-urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('accounts/', include('accounts.urls')),
-]
-
-from django.contrib import admin
-from django.urls import path, include
-
-urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('accounts/', include('accounts.urls')),
-    path('dashboard/', include('dashboard.urls')),
-]
-
-from django.contrib import admin
-from django.urls import path, include
-
-urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('accounts/', include('accounts.urls')),
-    path('dashboard/', include('dashboard.urls')),
-    path('produits/', include('produits.urls')),
-]
-
-from django.contrib import admin
-from django.urls import path, include
-
-urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('accounts/', include('accounts.urls')),
-    path('dashboard/', include('dashboard.urls')),
-    path('produits/', include('produits.urls')),
-    path('stocks/', include('stocks.urls')),
-]
-from django.contrib import admin
-from django.urls import path, include
-
-urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('accounts/', include('accounts.urls')),
-    path('dashboard/', include('dashboard.urls')),
-    path('produits/', include('produits.urls')),
-    path('stocks/', include('stocks.urls')),
-    path('livraisons/', include('livraisons.urls')),
-]
-from django.contrib import admin
-from django.urls import path, include
-
-urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('accounts/', include('accounts.urls')),
-    path('dashboard/', include('dashboard.urls')),
-    path('produits/', include('produits.urls')),
-    path('stocks/', include('stocks.urls')),
-    path('livraisons/', include('livraisons.urls')),
-    path('facturation/', include('facturation.urls')),
-]
-from django.contrib import admin
-from django.urls import path, include
-
-urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('accounts/', include('accounts.urls')),
-    path('dashboard/', include('dashboard.urls')),
-    path('produits/', include('produits.urls')),
-    path('stocks/', include('stocks.urls')),
-    path('livraisons/', include('livraisons.urls')),
-    path('facturation/', include('facturation.urls')),
-    path('caisse/', include('caisse.urls')),
-]
-from django.contrib import admin
-from django.urls import path, include
+from django.shortcuts import redirect
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -107,4 +29,5 @@ urlpatterns = [
     path('facturation/', include('facturation.urls')),
     path('caisse/', include('caisse.urls')),
     path('rapports/', include('rapports.urls')),
+    path('', lambda request: redirect('login')),  # ← redirige vers login
 ]
