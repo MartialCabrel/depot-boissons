@@ -25,8 +25,8 @@
             background-color: var(--primary);
             position: fixed;
             top: 0; left: 0;
-            z-index: 100;
-            transition: all 0.3s;
+            z-index: 1050;
+            transition: transform 0.3s ease;
         }
         .sidebar .logo {
             padding: 20px;
@@ -64,6 +64,7 @@
         .main-content {
             margin-left: 250px;
             min-height: 100vh;
+            transition: margin-left 0.3s ease;
         }
         .topbar {
             background: white;
@@ -83,6 +84,28 @@
             margin: 0;
         }
         .content-area { padding: 25px; }
+
+        /* Bouton hamburger (mobile uniquement) */
+        .sidebar-toggle-btn {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--primary);
+            padding: 0;
+            margin-right: 12px;
+        }
+
+        /* Overlay derrière la sidebar sur mobile */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1040;
+        }
+        .sidebar-overlay.show { display: block; }
 
         /* Cards */
         .stat-card {
@@ -126,6 +149,32 @@
         nav::-webkit-scrollbar {
             width: 0px;
         }
+
+        /* ===== RESPONSIVE MOBILE / TABLETTE ===== */
+        @media (max-width: 991.98px) {
+            .sidebar {
+                transform: translateX(-100%);
+                box-shadow: 4px 0 15px rgba(0,0,0,0.2);
+            }
+            .sidebar.show {
+                transform: translateX(0);
+            }
+            .main-content {
+                margin-left: 0;
+            }
+            .sidebar-toggle-btn {
+                display: inline-block;
+            }
+            .topbar {
+                padding: 12px 15px;
+            }
+            .content-area {
+                padding: 15px;
+            }
+            .topbar .d-flex.align-items-center.gap-3 span:first-child {
+                display: none; /* cache la date complète sur petit écran */
+            }
+        }
     </style>
 
     {% block extra_css %}{% endblock %}
@@ -133,8 +182,12 @@
 <body>
 
 {% if user.is_authenticated %}
+
+<!-- OVERLAY (mobile) -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
 <!-- SIDEBAR -->
-<div class="sidebar">
+<div class="sidebar" id="sidebar">
     <div class="logo">
         <h5><i class="bi bi-box-seam"></i> DepôtGest</h5>
         <small>Gestion de dépôt</small>
@@ -229,7 +282,12 @@
 <!-- MAIN CONTENT -->
 <div class="main-content">
     <div class="topbar">
-        <h6 class="page-title">{% block page_title %}{% endblock %}</h6>
+        <div class="d-flex align-items-center">
+            <button class="sidebar-toggle-btn" onclick="toggleSidebar()" aria-label="Ouvrir le menu">
+                <i class="bi bi-list"></i>
+            </button>
+            <h6 class="page-title mb-0">{% block page_title %}{% endblock %}</h6>
+        </div>
         <div class="d-flex align-items-center gap-3">
             <span class="text-muted" style="font-size:0.85rem;">
                 <i class="bi bi-calendar3"></i>
@@ -253,6 +311,21 @@
         {% block content %}{% endblock %}
     </div>
 </div>
+
+<script>
+    function toggleSidebar() {
+        document.getElementById('sidebar').classList.toggle('show');
+        document.getElementById('sidebarOverlay').classList.toggle('show');
+    }
+    // Ferme la sidebar automatiquement si on clique sur un lien (mobile)
+    document.querySelectorAll('.sidebar .nav-link').forEach(function(link) {
+        link.addEventListener('click', function() {
+            if (window.innerWidth < 992) {
+                toggleSidebar();
+            }
+        });
+    });
+</script>
 
 {% else %}
     {% block content_unauthenticated %}{% endblock %}
